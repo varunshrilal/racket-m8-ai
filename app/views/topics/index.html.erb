@@ -1,0 +1,9 @@
+<div class="container py-4">
+  <h1>Topics</h1>
+
+  <ul>
+    <% @topics.each do |topic| %>
+      <li><%= link_to topic.name, topic_path(topic) %></li>
+    <% end %>
+  </ul>
+</div>

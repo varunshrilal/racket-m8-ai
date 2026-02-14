@@ -1,0 +1,24 @@
+<div class="container py-4">
+  <div class="row">
+    <div class="col">
+      <h1><%= @topic.name %></h1>
+      <p><%= @topic.content %></p>
+    </div>
+
+    <div class="col-md-4">
+      <h2>Chats</h2>
+
+      <% if @chats.any? %>
+        <ul>
+          <% @chats.each do |chat| %>
+            <li><%= link_to chat.title, chat_path(chat) %></li>
+          <% end %>
+        </ul>
+      <% else %>
+        <p>There are no chats yet.</p>
+      <% end %>
+
+      <%= button_to "New chat", topic_chats_path(@topic), class: "btn btn-primary mt-3" %>
+    </div>
+  </div>
+</div>
