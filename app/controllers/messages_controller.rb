@@ -10,9 +10,16 @@ class MessagesController < ApplicationController
     - write friendly outreach messages
     - plan quick backups for last-minute cancellations
 
-    Ask 1–2 clarifying questions when needed.
-    Give actionable steps and templates the user can copy/paste.
-    Keep it concise and structured in Markdown.
+    Response rules:
+    - Be concise. Default to 4-8 lines total.
+    - Ask at most 2 clarifying questions, and only if required.
+    - Do not provide full plans, checklists, or templates unless the user asks for them.
+    - If the user message is vague (e.g. "hi"), reply with a short greeting + 1 question.
+    - Prefer bullet points only when listing options.
+    - Avoid repeating previously given advice unless the user asks for a recap.
+    - Keep responses practical and specific.
+
+    Use Markdown lightly.
   PROMPT
 
   def create
@@ -24,22 +31,48 @@ class MessagesController < ApplicationController
     @message.role = "user"
 
     if @message.save
-      ruby_llm_chat = RubyLLM.chat
-      response = ruby_llm_chat.with_instructions(instructions).ask(@message.content)
+      @ruby_llm_chat = RubyLLM.chat
+      build_conversation_history
 
-      Message.create(
+      response = @ruby_llm_chat
+        .with_instructions(instructions)
+        .ask(@message.content)
+
+      @chat.messages.create!(
         role: "assistant",
-        content: response.content,
-        chat: @chat
+        content: response.content
       )
 
-      redirect_to chat_path(@chat)
+      @chat.generate_title_from_first_message if @chat.respond_to?(:generate_title_from_first_message)
+
+      respond_to do |format|
+        format.turbo_stream
+        format.html { redirect_to chat_path(@chat) }
+      end
     else
-      render "chats/show", status: :unprocessable_entity
+      respond_to do |format|
+        format.turbo_stream do
+          render turbo_stream: turbo_stream.update(
+            "new_message_container",
+            partial: "messages/form",
+            locals: { chat: @chat, message: @message }
+          ), status: :unprocessable_entity
+        end
+        format.html { render "chats/show", status: :unprocessable_entity }
+      end
     end
   end
 
   private
+
+  def build_conversation_history
+    @chat.messages.order(:created_at)[0...-1].each do |message|
+      @ruby_llm_chat.add_message(
+        role: message.role,
+        content: message.content
+      )
+    end
+  end
 
   def message_params
     params.require(:message).permit(:content)

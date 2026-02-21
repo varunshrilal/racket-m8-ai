@@ -1,28 +1,16 @@
-<div class="container py-4">
+<div class="container py-4" data-controller="chat-scroll">
   <%= link_to "← #{@chat.topic.name}", topic_path(@chat.topic) %>
 
-  <h1 class="mt-3"><%= @chat.title %></h1>
+  <h1 id="chat_title" class="mt-3"><%= @chat.title %></h1>
 
-  <div id="messages" class="my-4">
-    <% @chat.messages.each do |message| %>
-      <% if message.role == "user" %>
-        <div class="d-flex justify-content-end mb-2">
-          <div class="bg-white px-3 pb-0 pt-3 rounded-pill">
-            <%= simple_format(message.content) %>
-          </div>
-        </div>
-      <% else %>
-        <div class="d-flex justify-content-start mb-4">
-          <div class="px-3 pb-0 pt-3">
-            <%= simple_format(message.content) %>
-          </div>
-        </div>
-      <% end %>
-    <% end %>
+  <div id="messages"
+       class="my-4"
+       data-chat-scroll-target="messages"
+       style="max-height: 60vh; overflow-y: auto;">
+    <%= render "messages/messages", messages: @chat.messages %>
   </div>
 
-  <%= simple_form_for [@chat, @message] do |f| %>
-    <%= f.input :content, label: "Ask a question", required: true, placeholder: "e.g., I'm in Surry Hills, intermediate, free Tue/Thu 6–8pm" %>
-    <%= f.button :submit, "Send", class: "btn btn-primary" %>
-  <% end %>
+  <div id="new_message_container">
+    <%= render "messages/form", chat: @chat, message: @message %>
+  </div>
 </div>
