@@ -24,10 +24,12 @@ class MessagesController < ApplicationController
     @message.role = "user"
 
     if @message.save
+      ruby_llm_chat = RubyLLM.chat
+      response = ruby_llm_chat.with_instructions(instructions).ask(@message.content)
 
       Message.create(
         role: "assistant",
-        content: "Got it. What’s your suburb, your level (beginner/intermediate/advanced), and your ideal time window?",
+        content: response.content,
         chat: @chat
       )
 
@@ -36,7 +38,6 @@ class MessagesController < ApplicationController
       render "chats/show", status: :unprocessable_entity
     end
   end
-
 
   private
 
