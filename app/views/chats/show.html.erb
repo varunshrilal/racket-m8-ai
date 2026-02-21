@@ -1,3 +1,4 @@
+<%= turbo_stream_from @chat %>
 <div class="container py-4" data-controller="chat-scroll">
   <%= link_to "← #{@chat.topic.name}", topic_path(@chat.topic) %>
 

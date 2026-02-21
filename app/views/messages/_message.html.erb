@@ -1,0 +1,15 @@
+<% if message.role == "user" %>
+  <div class="d-flex justify-content-end mb-2">
+    <div>
+      <div class="bg-white px-3 pb-0 pt-3 rounded-pill">
+        <%= simple_format(message.content) %>
+      </div>
+    </div>
+  </div>
+<% elsif message.role == "assistant" %>
+  <div class="d-flex justify-content-start mb-4" id="<%= dom_id(message) %>">
+    <div class="px-3 pb-0 pt-3">
+      <%= message.content.present? ? simple_format(message.content) : "..." %>
+    </div>
+  </div>
+<% end %>

@@ -31,17 +31,15 @@ class MessagesController < ApplicationController
     @message.role = "user"
 
     if @message.save
-      @ruby_llm_chat = RubyLLM.chat
-      build_conversation_history
-
-      response = @ruby_llm_chat
-        .with_instructions(instructions)
-        .ask(@message.content)
-
-      @chat.messages.create!(
+      @assistant_message = @chat.messages.create!(
         role: "assistant",
-        content: response.content
+        content: ""
       )
+
+      send_question
+
+      @assistant_message.update!(content: @response.content)
+      broadcast_replace(@assistant_message)
 
       @chat.generate_title_from_first_message if @chat.respond_to?(:generate_title_from_first_message)
 
@@ -65,8 +63,33 @@ class MessagesController < ApplicationController
 
   private
 
+  def send_question(model: "gpt-4o-mini", with: {})
+    @ruby_llm_chat = RubyLLM.chat(model: model)
+    build_conversation_history
+    @ruby_llm_chat.with_instructions(instructions)
+
+    @response = @ruby_llm_chat.ask(@message.content, with: with) do |chunk|
+      next if chunk.content.blank?
+
+      @assistant_message.content ||= ""
+      @assistant_message.content += chunk.content
+      broadcast_replace(@assistant_message)
+    end
+  end
+
+  def broadcast_replace(message)
+    Turbo::StreamsChannel.broadcast_replace_to(
+      @chat,
+      target: helpers.dom_id(message),
+      partial: "messages/message",
+      locals: { message: message }
+    )
+  end
+
   def build_conversation_history
-    @chat.messages.order(:created_at)[0...-1].each do |message|
+    @chat.messages.order(:created_at).each do |message|
+      next if message.content.blank?
+
       @ruby_llm_chat.add_message(
         role: message.role,
         content: message.content
