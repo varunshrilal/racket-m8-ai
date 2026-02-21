@@ -1,15 +1,15 @@
 <% if message.role == "user" %>
-  <div class="d-flex justify-content-end mb-2">
-    <div>
-      <div class="bg-white px-3 pb-0 pt-3 rounded-pill">
-        <%= simple_format(message.content) %>
-      </div>
+  <div class="rm8-message-row rm8-message-row-user">
+    <div class="rm8-message-bubble rm8-message-bubble-user">
+      <div class="rm8-message-label">You</div>
+      <%= simple_format(message.content) %>
     </div>
   </div>
 <% elsif message.role == "assistant" %>
-  <div class="d-flex justify-content-start mb-4" id="<%= dom_id(message) %>">
-    <div class="px-3 pb-0 pt-3">
-      <%= message.content.present? ? simple_format(message.content) : "..." %>
+  <div class="rm8-message-row rm8-message-row-assistant" id="<%= dom_id(message) %>">
+    <div class="rm8-message-bubble rm8-message-bubble-assistant">
+      <div class="rm8-message-label">Racket M8</div>
+      <%= message.content.present? ? simple_format(message.content) : content_tag(:span, "Thinking…", class: "rm8-thinking") %>
     </div>
   </div>
 <% end %>

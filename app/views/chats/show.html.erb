@@ -1,17 +1,28 @@
 <%= turbo_stream_from @chat %>
-<div class="container py-4" data-controller="chat-scroll">
-  <%= link_to "← #{@chat.topic.name}", topic_path(@chat.topic) %>
 
-  <h1 id="chat_title" class="mt-3"><%= @chat.title %></h1>
+<div class="rm8-page" data-controller="chat-scroll">
+  <div class="rm8-container">
+    <div class="rm8-chat-shell">
+      <div class="rm8-chat-header">
+        <div>
+          <%= link_to "← #{@chat.topic.name}", topic_path(@chat.topic), class: "rm8-back-link" %>
+          <h1 id="chat_title" class="rm8-chat-title">
+            <%= @chat.title.presence || "New Racket M8 Chat" %>
+          </h1>
+          <p class="rm8-chat-subtitle">Plan players, courts, and backup options faster.</p>
+        </div>
+        <span class="rm8-badge">AI Assistant</span>
+      </div>
 
-  <div id="messages"
-       class="my-4"
-       data-chat-scroll-target="messages"
-       style="max-height: 60vh; overflow-y: auto;">
-    <%= render "messages/messages", messages: @chat.messages %>
-  </div>
+      <div id="messages"
+           class="rm8-messages"
+           data-chat-scroll-target="messages">
+        <%= render "messages/messages", messages: @chat.messages %>
+      </div>
 
-  <div id="new_message_container">
-    <%= render "messages/form", chat: @chat, message: @message %>
+      <div id="new_message_container" class="rm8-composer-wrap">
+        <%= render "messages/form", chat: @chat, message: @message %>
+      </div>
+    </div>
   </div>
 </div>

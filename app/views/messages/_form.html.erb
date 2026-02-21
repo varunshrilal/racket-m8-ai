@@ -1,15 +1,13 @@
-<% if message.errors.any? %>
-  <div class="alert alert-danger">
-    <% message.errors.full_messages.each do |msg| %>
-      <div><%= msg %></div>
-    <% end %>
-  </div>
-<% end %>
+<%= simple_form_for [chat, message], html: { class: "rm8-composer-form" } do |f| %>
+  <div class="rm8-composer-card">
+    <%= f.input :content,
+      label: false,
+      required: true,
+      placeholder: "e.g., Marrickville, intermediate, Tue 8pm. Need a short outreach message + backup court.",
+      input_html: { class: "rm8-composer-input", rows: 3 } %>
 
-<%= simple_form_for [chat, message] do |f| %>
-  <%= f.input :content,
-              label: "Ask a question",
-              required: true,
-              placeholder: "e.g., I'm in Surry Hills, intermediate, free Tue/Thu 6–8pm" %>
-  <%= f.button :submit, "Send", class: "btn btn-primary" %>
+    <div class="rm8-composer-actions">
+      <%= f.button :submit, "Send", class: "rm8-btn rm8-btn-primary" %>
+    </div>
+  </div>
 <% end %>
